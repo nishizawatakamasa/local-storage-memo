@@ -11,6 +11,8 @@ const urlsToCache = [
 
 // インストール時にファイルをキャッシュする
 self.addEventListener('install', function(event) {
+  // 待機状態をスキップして即座にインストール完了させる
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
@@ -31,6 +33,9 @@ self.addEventListener('activate', function(event) {
           }
         })
       );
+    }).then(() => {
+      // 即座に新しいSWを有効化
+      self.clients.claim();
     })
   );
 });
