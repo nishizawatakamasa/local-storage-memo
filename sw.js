@@ -1,14 +1,15 @@
 // キャッシュの名前
-var CACHE_NAME = 'pwa-memo-v1';
+var CACHE_NAME = 'pwa-memo-v1'; // ← 更新時はここを v2, v3... に変える
 var urlsToCache = [
   './',
   './index.html',
   './manifest.json',
   './icon192.png',
   './icon512.png',
+  './apple-touch-icon.png',
 ];
 
-// 1. インストール時にファイルをキャッシュする
+// インストール時にファイルをキャッシュする
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -18,7 +19,23 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// 2. ページを開く時、ネットに行く前にキャッシュを見る
+// 新しいSWが起動したとき、古いキャッシュを削除する
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          // 現在のキャッシュ名と違うものは全て削除
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+// ページを開く時、ネットに行く前にキャッシュを見る
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
