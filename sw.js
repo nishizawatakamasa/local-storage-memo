@@ -1,5 +1,5 @@
 // キャッシュの名前
-var CACHE_NAME = 'pwa-memo-v1'; // ← 更新時はここを v2, v3... に変える
+var CACHE_NAME = 'pwa-memo-v2'; // ← 更新時はここを v2, v3... に変える
 var urlsToCache = [
   './',
   './index.html',
