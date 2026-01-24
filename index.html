@@ -1,75 +1,93 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LocalStorage Memo</title>
-    <!-- PWA用設定 -->
-    <link rel="manifest" href="manifest.json">
-    <!-- iPhone用アイコン設定 -->
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalStorage Memo</title>
+  <!-- PWA用設定 -->
+  <link rel="manifest" href="manifest.json">
+  <!-- iPhone用アイコン設定 -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #fff; }
-        textarea {
-            width: 100%; height: 100%; border: none; padding: 3px;
-            font-size: 16px; font-family: sans-serif; resize: none; outline: none;
-            box-sizing: border-box; line-height: 1.2; color: #333;
-        }
-    </style>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 3px;
+      font-size: 16px;
+      font-family: sans-serif;
+      resize: none;
+      outline: none;
+      box-sizing: border-box;
+      line-height: 1.2;
+      color: #333;
+    }
+  </style>
 </head>
+
 <body>
-    <textarea id="memo" placeholder="Type here..."></textarea>
-    <script>
-        const memo = document.getElementById('memo');
-        // 保存データのキー名
-        const KEY = 'lsmemo_v2';
+  <textarea id="memo" placeholder="Type here..."></textarea>
+  <script>
+    const memo = document.getElementById('memo');
+    // 保存データのキー名
+    const KEY = 'lsmemo_v2';
 
-        // localStorageのエラーハンドリング
-        const loadMemo = () => {
-            try {
-                return localStorage.getItem(KEY) || '';
-            } catch (e) {
-                console.error('localStorage読み込みエラー:', e);
-                alert('メモの読み込みに失敗しました。プライベートブラウジングモードではない確認してください。');
-                return '';
-            }
+    // localStorageのエラーハンドリング
+    const loadMemo = () => {
+      try {
+        return localStorage.getItem(KEY) || '';
+      } catch (e) {
+        console.error('localStorage読み込みエラー:', e);
+        alert('メモの読み込みに失敗しました。プライベートブラウジングモードではない確認してください。');
+        return '';
+      }
+    }
+
+    const saveMemo = (value) => {
+      try {
+        localStorage.setItem(KEY, value);
+      } catch (e) {
+        console.error('localStorage保存エラー:', e);
+        if (e.name === 'QuotaExceededError') {
+          alert('保存容量が上限に達しました。');
         }
+      }
+    }
 
-        const saveMemo = (value) => {
-            try {
-                localStorage.setItem(KEY, value);
-            } catch (e) {
-                console.error('localStorage保存エラー:', e);
-                if (e.name === 'QuotaExceededError') {
-                    alert('保存容量が上限に達しました。');
-                }
-            }
-        }
-
-        memo.value = loadMemo();
-        memo.oninput = () => saveMemo(memo.value);
-        // 開いた瞬間に書き込めるようにする
-        memo.focus();
-
-        // Tabキーでインデントを入力できるようにする
-        memo.addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault(); // フォーカス移動を無効化
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                // タブ文字(\t)を挿入
-                this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
-                // カーソル位置を調整
-                this.selectionStart = this.selectionEnd = start + 1;
-                // inputイベントを手動発火して保存させる（value書き換えだけだとoninputが動かない場合があるため）
-                saveMemo(memo.value);
-            }
-        });
-        // PWAとしてインストール可能にする
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
+    memo.value = loadMemo();
+    memo.oninput = () => saveMemo(memo.value);
+    // 開いた瞬間に書き込めるようにする
+    memo.focus();
+    // Tabキーでインデントを入力できるようにする
+    memo.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab') {
+        // フォーカス移動を無効化
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        // タブ文字(\t)を挿入
+        this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+        // カーソル位置を調整
+        this.selectionStart = this.selectionEnd = start + 1;
+        // inputイベントを手動発火して保存させる（value書き換えだけだとoninputが動かない場合があるため）
+        saveMemo(memo.value);
+      }
+    });
+    // PWAとしてインストール可能にする
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 </body>
 </html>
